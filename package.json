@@ -1,7 +1,7 @@
 {
-  "name": "export-volume",
+  "name": "dt",
   "version": "1.0.0",
-  "description": "export docker volumes",
+  "description": "docker cli tools",
   "main": "index.js",
   "scripts": {
     "start": "DEBUG=false node index.js",
