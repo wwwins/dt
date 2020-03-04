@@ -9,7 +9,7 @@
   },
   "author": "jacky.huang@isobar.com",
   "bin": {
-    "export-volume": "index.js"
+    "dt": "index.js"
   },
   "license": "MIT",
   "dependencies": {
