@@ -83,13 +83,19 @@ function getDockerContainerName(next, cmd) {
 }
 
 function containerMenu(list, cmd) {
-  const items = list.slice(0,-1);
-  if (items.length<2) {
+  const lists = list.slice(0,-1);
+  if (lists.length<2) {
     term.red('沒有任何 Container');
     setTimeout(function() {mainMenu(MAIN_MENU);}, 1000);
     return;
   }
-  items.shift();
+  lists.shift();
+  // CONTAINER ID,IMAGE,COMMAND,CREATED,STATUS,NAMES,SIZE
+  //let items = lists.map(x => x.split(',').splice(0,2).concat(x.split(',').splice(4,2)));
+  let items = lists.map(function (x) {
+    let s = x.split(',');
+    return s[0]+'('+s[5]+') '+s[1]+' '+s[4]
+  })
   term.clear();
   term.cyan('請選擇要刪除的 Conatiner 名稱\n');
   term.singleColumnMenu(
