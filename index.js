@@ -7,7 +7,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const term = require('terminal-kit').terminal;
 
-const MAIN_MENU = ['1. Remove container', '2. Remove volume', '3. Export volume', '4. Exit'];
+const MAIN_MENU = ['Remove container', 'Remove volume', 'Export volume', 'Exit'];
 const CMD_EXPORT= 'docker run --rm -v #:/workspaces busybox tar -C /workspaces -zcf - . > #.tgz';
 const CMD_RM_VOLUME = 'docker volume rm #';
 const CMD_RM_CONTAINER = 'docker rm #';
@@ -97,9 +97,14 @@ function containerMenu(list, cmd) {
     return s[0]+' ('+s[5]+') '+s[1]+' '+s[4]
   })
   term.clear();
+  term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Conatiner 名稱\n');
   term.singleColumnMenu(
-      items, (error, response) => {
+      items,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
+      if (response.selectedText===undefined) {
+          mainMenu(MAIN_MENU);
+          return;
+      }
       term( '\n' ).eraseLineAfter.green(
         "#%s selected: %s (%s,%s)\n",
         response.selectedIndex+1 ,
@@ -117,9 +122,14 @@ function containerMenu(list, cmd) {
 
 function volumeMenu(items, cmd) {
   term.clear();
+  term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要匯出的 volume 名稱\n');
   term.singleColumnMenu(
-      items, (error, response) => {
+      items,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
+      if (response.selectedText===undefined) {
+          mainMenu(MAIN_MENU);
+          return;
+      }
       term( '\n' ).eraseLineAfter.green(
         "#%s selected: %s (%s,%s)\n",
         response.selectedIndex+1 ,
@@ -127,7 +137,7 @@ function volumeMenu(items, cmd) {
         response.x ,
         response.y,
       );
-      term('匯出 %s.tgz\n%s', response.selectedText,cmd);
+      term('匯出 %s.tgz\n', response.selectedText);
       doCmd(cmd.replace(/#/g,response.selectedText), () => {
         mainMenu(MAIN_MENU);
       });
@@ -136,8 +146,8 @@ function volumeMenu(items, cmd) {
 
 function mainMenu(items) {
   term.clear();
-  term.green('Hit CTRL-C to quit.\n');
-  const menu = term.singleColumnMenu(items, (error, response) => {
+  term.green('Hit CTRL-C to Quit.\n');
+  const menu = term.singleColumnMenu(items,{selectedLeftPadding:'*'}, (error, response) => {
       term( '\n' ).eraseLineAfter.green(
         "#%s selected: %s (%s,%s)\n",
         response.selectedIndex+1 ,
