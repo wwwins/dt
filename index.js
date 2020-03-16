@@ -123,7 +123,10 @@ function containerMenu(list, cmd) {
 function volumeMenu(items, cmd) {
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
-  term.cyan('請選擇要匯出的 volume 名稱\n');
+  if (cmd===CMD_EXPORT)
+    term.cyan('請選擇要匯出的 volume 名稱\n');
+  else
+    term.cyan('請選擇要刪除的 volume 名稱\n');
   term.singleColumnMenu(
       items,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
       if (response.selectedText===undefined) {
