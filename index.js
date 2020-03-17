@@ -49,7 +49,7 @@ function imageMenu(list, cmd) {
   })
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
-  term.cyan('請選擇要刪除的 Conatiner 名稱\n');
+  term.cyan('請選擇要刪除的 Image 名稱\n');
   term.singleColumnMenu(
       items,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
       if (response.selectedText===undefined) {
@@ -81,11 +81,15 @@ function containerMenu(list, cmd) {
   // Remove title
   lists.shift();
   // CONTAINER ID,IMAGE,COMMAND,CREATED,STATUS,NAMES,SIZE
+  let items = lists.map(function (x) {
+    let s = x.split(',');
+    return s[0]+':'+s[5]+" ("+s[1]+") "+s[4]
+  })
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Conatiner 名稱\n');
   term.singleColumnMenu(
-      lists,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
+      items,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
       if (response.selectedText===undefined) {
           mainMenu(MAIN_MENU);
           return;
