@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 
-const path = require('path');
 const { spawn } = require('child_process');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const term = require('terminal-kit').terminal;
+const dk = require('./docker-utils');
 
 const MAIN_MENU = ['Remove container', 'Remove volume', 'Export volume', 'Remove Image', 'Exit'];
 const CMD_EXPORT= 'docker run --rm -v #:/workspaces busybox tar -C /workspaces -zcf - . > #.tgz';
@@ -32,79 +32,6 @@ async function doCmd(cmd, next) {
     next();
 }
 
-function getDockerImageName(next, cmd) {
-  const process = spawn('docker', ['images']);
-  let bufs = '';
-  let errs = '';
-
-  process.stdout.on('data', (data) => {
-    bufs = bufs + Buffer.from(data).toString().replace(/\s{2,}/g,',');
-    console.log('stdout:'+data);
-  })
-
-  process.stderr.on('data', (data) => {
-    errs = errs + Buffer.from(data).toString();
-    console.log('stderr:'+data);
-  })
-
-  process.on('exit', (data) => {
-    next(bufs.split("\n"), cmd);
-  })
-
-  process.on('error', (data) => {
-    console.log('error:'+data);
-  })
-}
-
-function getDockerVolumeName(next, cmd) {
-  const process = spawn('docker', ['volume', 'ls', '-q']);
-  let bufs = '';
-  let errs = '';
-
-  process.stdout.on('data', (data) => {
-    bufs = bufs + Buffer.from(data).toString();
-    console.log('stdout:'+data);
-  })
-
-  process.stderr.on('data', (data) => {
-    errs = errs + Buffer.from(data).toString();
-    console.log('stderr:'+data);
-  })
-
-  process.on('exit', (data) => {
-    const s = bufs.split("\n").slice(0,-1);
-    next(s, cmd);
-  })
-
-  process.on('error', (data) => {
-    console.log('error:'+data);
-  })
-}
-
-function getDockerContainerName(next, cmd) {
-  const process = spawn('docker', ['ps', '-as']);
-  let bufs = '';
-  let errs = '';
-
-  process.stdout.on('data', (data) => {
-    bufs = bufs + Buffer.from(data).toString().replace(/\s{2,}/g,',');
-    console.log('stdout:'+data);
-  })
-
-  process.stderr.on('data', (data) => {
-    errs = errs + Buffer.from(data).toString();
-    console.log('stderr:'+data);
-  })
-
-  process.on('exit', (data) => {
-    next(bufs.split("\n"), cmd);
-  })
-
-  process.on('error', (data) => {
-    console.log('error:'+data);
-  })
-}
-
 function imageMenu(list, cmd) {
   const lists = list.slice(0,-1);
   if (lists.length<2) {
@@ -112,6 +39,7 @@ function imageMenu(list, cmd) {
     setTimeout(function() {mainMenu(MAIN_MENU);}, 1000);
     return;
   }
+  // Remove title
   lists.shift();
   // REPOSITORY, TAG, IMAGE ID, CREATED, SIZE
   //let items = lists.map(x => x.split(',').splice(0,2).concat(x.split(',').splice(4,2)));
@@ -150,13 +78,14 @@ function containerMenu(list, cmd) {
     setTimeout(function() {mainMenu(MAIN_MENU);}, 1000);
     return;
   }
+  // Remove title
   lists.shift();
   // CONTAINER ID,IMAGE,COMMAND,CREATED,STATUS,NAMES,SIZE
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Conatiner 名稱\n');
   term.singleColumnMenu(
-      list,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
+      lists,{selectedLeftPadding:'*', cancelable:true}, (error, response) => {
       if (response.selectedText===undefined) {
           mainMenu(MAIN_MENU);
           return;
@@ -176,7 +105,13 @@ function containerMenu(list, cmd) {
   })
 }
 
-function volumeMenu(items, cmd) {
+function volumeMenu(list, cmd) {
+  const items = list.slice(0,-1);
+  if (items.length<2) {
+    term.red('沒有任何 Volume');
+    setTimeout(function() {mainMenu(MAIN_MENU);}, 1000);
+    return;
+  }
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   if (cmd===CMD_EXPORT)
@@ -217,18 +152,19 @@ function mainMenu(items) {
       switch (response.selectedIndex) {
         case 0:
           // Remove container
-          getDockerContainerName(containerMenu, CMD_RM_CONTAINER);
+          dk.getDockerContainerName(containerMenu, CMD_RM_CONTAINER);
           break;
         case 1:
           // Remove volume
-          getDockerVolumeName(volumeMenu, CMD_RM_VOLUME);
+          dk.getDockerVolumeName(volumeMenu, CMD_RM_VOLUME);
           break;
         case 2:
           // Export volume
-          getDockerVolumeName(volumeMenu, CMD_EXPORT);
+          dk.getDockerVolumeName(volumeMenu, CMD_EXPORT);
           break;
         case 3:
-          getDockerImageName(imageMenu, CMD_RM_IMAGE);
+          // Remove Image
+          dk.getDockerImageName(imageMenu, CMD_RM_IMAGE);
           break;
         case 4:
           term.processExit();
