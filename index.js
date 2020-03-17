@@ -42,11 +42,7 @@ function imageMenu(list, cmd) {
   // Remove title
   lists.shift();
   // REPOSITORY, TAG, IMAGE ID, CREATED, SIZE
-  //let items = lists.map(x => x.split(',').splice(0,2).concat(x.split(',').splice(4,2)));
-  let items = lists.map(function (x) {
-    let s = x.split(',');
-    return s[2]+':'+s[1]+" ("+s[3]+") "+s[0]
-  })
+  let items = [...list];
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Image 名稱\n');
@@ -63,7 +59,7 @@ function imageMenu(list, cmd) {
         response.x ,
         response.y,
       );
-      let idx = response.selectedText.split(' ')[2]
+      let idx = response.selectedText.split(/\s{2,}/)[2];
       term('刪除 %s\n', idx);
       doCmd(cmd.replace(/#/g,idx), () => {
         mainMenu(MAIN_MENU);

@@ -3,7 +3,7 @@
 const { spawn } = require('child_process');
 
 function getDockerImageName(next, cmd) {
-  runDockerCmd(next, cmd, ['images'], true);
+  runDockerCmd(next, cmd, ['images']);
 }
 
 function getDockerVolumeName(next, cmd) {
@@ -20,10 +20,7 @@ function runDockerCmd(next, cmd, cmd_args, remove_space) {
   let errs = '';
 
   process.stdout.on('data', (data) => {
-    if (remove_space)
-      bufs = bufs + Buffer.from(data).toString().replace(/\s{2,}/g,',');
-    else
-      bufs = bufs + Buffer.from(data).toString();
+    bufs = bufs + Buffer.from(data).toString();
     console.log('stdout:'+data);
   })
 
@@ -33,6 +30,9 @@ function runDockerCmd(next, cmd, cmd_args, remove_space) {
   })
 
   process.on('exit', (data) => {
+    if (remove_space) {
+      bufs = bufs.replace(/\s{2,}/g,',');
+    }
     next(bufs.split("\n"),cmd);
     //const s = bufs.split("\n").slice(0,-1);
     //next(s, cmd);
