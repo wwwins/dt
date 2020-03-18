@@ -59,7 +59,8 @@ function imageMenu(list, cmd) {
         response.x ,
         response.y,
       );
-      let idx = response.selectedText.split(/\s{2,}/)[2];
+      //let idx = response.selectedText.split(/\s{2,}/)[2];
+      let idx = response.selectedText.split(' ')[0];
       term('刪除 %s\n', idx);
       doCmd(cmd.replace(/#/g,idx), () => {
         mainMenu(MAIN_MENU);
@@ -77,10 +78,11 @@ function containerMenu(list, cmd) {
   // Remove title
   lists.shift();
   // CONTAINER ID,IMAGE,COMMAND,CREATED,STATUS,NAMES,SIZE
-  let items = lists.map(function (x) {
-    let s = x.split(',');
-    return s[0]+':'+s[5]+" ("+s[1]+") "+s[4]
-  })
+  //let items = lists.map(function (x) {
+  //  let s = x.split(',');
+  //  return s[0]+':'+s[5]+" ("+s[1]+") "+s[4]
+  //})
+  let items = [...lists];
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Conatiner 名稱\n');

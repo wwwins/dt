@@ -3,7 +3,7 @@
 const { spawn } = require('child_process');
 
 function getDockerImageName(next, cmd) {
-  runDockerCmd(next, cmd, ['images']);
+  runDockerCmd(next, cmd, ['images', '--format=table{{.ID}} {{.Repository}}:{{.Tag}} ({{.CreatedSince}})']);
 }
 
 function getDockerVolumeName(next, cmd) {
@@ -11,7 +11,7 @@ function getDockerVolumeName(next, cmd) {
 }
 
 function getDockerContainerName(next, cmd) {
-  runDockerCmd(next, cmd, ['ps', '-as'], true);
+  runDockerCmd(next, cmd, ['ps', '-as', '--format=table{{.ID}} {{.Image}} {{.Names}} ({{.Status}})']);
 }
 
 function runDockerCmd(next, cmd, cmd_args, remove_space) {
