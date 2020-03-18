@@ -42,7 +42,7 @@ function imageMenu(list, cmd) {
   // Remove title
   lists.shift();
   // REPOSITORY, TAG, IMAGE ID, CREATED, SIZE
-  let items = [...list];
+  let items = [...lists];
   term.clear();
   term.green('Hit ESCAPE to Back.\n');
   term.cyan('請選擇要刪除的 Image 名稱\n');
